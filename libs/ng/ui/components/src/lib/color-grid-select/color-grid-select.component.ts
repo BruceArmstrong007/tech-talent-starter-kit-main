@@ -11,9 +11,11 @@ import {
   OnDestroy,
   Output,
   QueryList,
+  Signal,
   ViewChildren,
   computed,
   inject,
+  input,
   signal,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
@@ -21,11 +23,11 @@ import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 import {
   COLOR_GRID_ITEMS,
   COLOR_GRID_ITEM_SIZES,
-  ColorGridItemSize,
   ColorGridItemComponent,
   ColorGridSelect,
   COLOR_GRID_SELECT,
   ITEM_SIZE,
+  ColorGridItemSize,
 } from './item';
 import { FocusKeyManager } from '@angular/cdk/a11y';
 import {
@@ -75,10 +77,7 @@ export class ColorGridSelectComponent
   /** Emits when the list has been destroyed. */
   private readonly _destroyed = new Subject<void>();
 
-  private readonly _items = signal(COLOR_GRID_ITEMS);
-  private readonly _itemSize = signal<ColorGridItemSize>(
-    COLOR_GRID_ITEM_SIZES[0]
-  );
+
 
   private readonly _el = inject(ElementRef<ColorGridSelectComponent>);
 
@@ -98,8 +97,7 @@ export class ColorGridSelectComponent
 
   @HostBinding('attr.tabindex')
   private get _tabIndex() {
-    // return -1;
-    return this.disabled ? -1 : 0;
+    return this.disabled() ? -1 : 0;
   }
 
   @HostBinding('role')
@@ -110,24 +108,12 @@ export class ColorGridSelectComponent
   @ViewChildren(ColorGridItemComponent)
   public colorItems!: QueryList<ColorGridItemComponent>;
 
-  @Input()
-  public set items(value) {
-    this._items.set(value);
-  }
+  items = input<string[]>(COLOR_GRID_ITEMS)
 
-  public get items() {
-    return this._items();
-  }
+  public itemSize = input<ColorGridItemSize>(COLOR_GRID_ITEM_SIZES[0])
 
-  @Input()
-  public get itemSize(): ColorGridItemSize {
-    return this._itemSize();
-  }
 
-  public set itemSize(value: ColorGridItemSize) {
-    this._itemSize.set(value);
-  }
-
+  // can not be converted as input signal's value cant be updated
   @Input()
   public get value(): string | null | undefined {
     return this._value;
@@ -136,27 +122,31 @@ export class ColorGridSelectComponent
   public set value(value: string | null | undefined) {
     this._value = value;
     // this._updateKeyManagerActiveItem();
+    const activeItem = this._keyManager?.activeItemIndex ?? 0;
+    this._setActiveOption(activeItem);
   }
 
-  @Input()
-  public disabled = false;
+public disabled = input<boolean>(false)
 
   @Output()
   public readonly valueChange = new EventEmitter<string | null | undefined>();
 
   width = signal(0);
 
+  itemSizeInPx: Signal<number> = computed(() => ITEM_SIZE[this.itemSize()]);
+
+  itemsPerRow: Signal<number> = computed(() => {
+    return this.width() === 0
+      ? this.itemSizeInPx() // any item size
+      : this.width() / this.itemSizeInPx();
+  });
+
   /** @todo logic to generate a grid of colors to allow navigation */
   public readonly grid = computed((): string[][] => {
     // Calculate the number of items that can be added per row
     // The calculation will be based on the available width of the element width and itemSize
     //   this._itemsPerRow = ...
-    const itemsPerRow =
-      this.width() === 0
-        ? ITEM_SIZE[this.itemSize] // any item size
-        : this.width() / ITEM_SIZE[this.itemSize];
-
-    return chunk(this._items(), itemsPerRow);
+    return chunk(this.items(), this.itemsPerRow());
   });
 
   public get keyMan() {
@@ -207,11 +197,11 @@ export class ColorGridSelectComponent
   }
 
   public ngAfterViewInit() {
-    this.width.set(this._el.nativeElement.offsetLeft);
+    this.width.set(this._el.nativeElement.offsetWidth);
     this._keyManager = new FocusKeyManager(this.colorItems)
       .withHomeAndEnd()
       .withHorizontalOrientation('ltr')
-      .skipPredicate(() => this.disabled)
+      .skipPredicate(() => this.disabled())
       .withWrap();
 
     // Set the initial focus.
@@ -258,27 +248,23 @@ export class ColorGridSelectComponent
    */
   @HostListener('keydown', ['$event'])
   private _onKeydown(event: KeyboardEvent) {
-    if (this.disabled) {
+    if (this.disabled()) {
       event.preventDefault();
       this._resetActiveOption();
       return;
     }
-    const itemsPerRow =
-      this.width() === 0
-        ? ITEM_SIZE[this.itemSize] // any item size
-        : this.width() / ITEM_SIZE[this.itemSize];
     let itemCalc;
     const activeItem = this._keyManager?.activeItemIndex ?? 0;
     switch (event.keyCode) {
       case UP_ARROW:
-        itemCalc = activeItem - Math.trunc(itemsPerRow);
+        itemCalc = activeItem - Math.trunc(this.itemsPerRow());
         if (itemCalc >= 0) {
           this._setActiveOption(Math.trunc(itemCalc));
         }
         break;
       case DOWN_ARROW:
-        itemCalc = activeItem + Math.trunc(itemsPerRow);
-        if (itemCalc < this._items().length) {
+        itemCalc = activeItem + Math.trunc(this.itemsPerRow());
+        if (itemCalc < this.items().length) {
           this._setActiveOption(Math.trunc(itemCalc));
         }
         break;
@@ -323,11 +309,11 @@ export class ColorGridSelectComponent
    * @param index Index of the active option. If set to -1, no option will be active.
    */
   private _setActiveOption(index: number) {
-    this.colorItems.forEach((item, itemIndex) => {
+    this.colorItems?.forEach((item, itemIndex) => {
       item.setTabindex(itemIndex === index ? 0 : -1);
     });
 
-    this._keyManager.setActiveItem(index);
+    this._keyManager?.setActiveItem(index);
   }
 
   /**
@@ -335,7 +321,7 @@ export class ColorGridSelectComponent
    * Otherwise, focus the first selected option.
    */
   private _resetActiveOption() {
-    if (this.disabled) {
+    if (this.disabled()) {
       this._setActiveOption(-1);
       return;
     }

@@ -10,6 +10,7 @@ import {
   Input,
   booleanAttribute,
   inject,
+  input,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
@@ -98,7 +99,7 @@ export class ColorGridItemComponent implements Highlightable, FocusableOption {
   public id: string = this._uniqueId;
 
   /** Analog to HTML 'name' attribute used to group radios for unique selection. */
-  @Input() name!: string;
+  name = input<string>();
 
   @Input()
   public get value() {
@@ -112,15 +113,14 @@ export class ColorGridItemComponent implements Highlightable, FocusableOption {
     }
   }
 
-  @Input()
-  public size: ColorGridItemSize = COLOR_GRID_ITEM_SIZES[0];
+  public size = input<ColorGridItemSize>(COLOR_GRID_ITEM_SIZES[0]);
 
   @HostBinding('attr.aria-selected')
   @Input({ transform: booleanAttribute })
   public checked = false;
 
   /** Whether the radio button is disabled. */
-  @Input({ transform: booleanAttribute })
+  @Input()
   get disabled(): boolean {
     return this._disabled;
   }
