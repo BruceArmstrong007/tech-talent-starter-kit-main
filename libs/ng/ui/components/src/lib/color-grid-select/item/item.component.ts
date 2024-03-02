@@ -15,7 +15,6 @@ import { CommonModule } from '@angular/common';
 
 import { FocusableOption, Highlightable } from '@angular/cdk/a11y';
 
-
 export const ITEM_SIZE: Record<string, number> = {
   small: 32,
   medium: 64,
@@ -167,7 +166,7 @@ export class ColorGridItemComponent implements Highlightable, FocusableOption {
     }
   }
 
-  @HostListener('click')
+  @HostListener('click', ['$event'])
   private _toggleOnInteraction() {
     if (!this.disabled) {
       if (!this.checked) {

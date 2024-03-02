@@ -9,7 +9,7 @@
   <div
     class="flex rounded-full justify-center items-center size-full"
     [style.background-color]="value"
-    [ngClass]="{ 'ring-2 ring-blue-600 ring-offset-1': checked }"
+    [ngClass]="{ 'ring-2 ring-blue-600 ring-offset-1': checked && !disabled }"
     role="radio"
     [attr.aria-checked]="checked"
   ></div>

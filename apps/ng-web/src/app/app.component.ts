@@ -36,4 +36,8 @@ export class AppComponent {
       validators: [Validators.required],
     }),
   });
+
+  constructor() {
+    // this.form.controls.color.disable();
+  }
 }

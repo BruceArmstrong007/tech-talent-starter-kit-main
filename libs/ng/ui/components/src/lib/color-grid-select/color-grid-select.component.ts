@@ -258,6 +258,11 @@ export class ColorGridSelectComponent
    */
   @HostListener('keydown', ['$event'])
   private _onKeydown(event: KeyboardEvent) {
+    if (this.disabled) {
+      event.preventDefault();
+      this._resetActiveOption();
+      return;
+    }
     const itemsPerRow =
       this.width() === 0
         ? ITEM_SIZE[this.itemSize] // any item size
@@ -267,7 +272,7 @@ export class ColorGridSelectComponent
     switch (event.keyCode) {
       case UP_ARROW:
         itemCalc = activeItem - Math.trunc(itemsPerRow);
-        if (itemCalc >=  0) {
+        if (itemCalc >= 0) {
           this._setActiveOption(Math.trunc(itemCalc));
         }
         break;
@@ -275,7 +280,6 @@ export class ColorGridSelectComponent
         itemCalc = activeItem + Math.trunc(itemsPerRow);
         if (itemCalc < this._items().length) {
           this._setActiveOption(Math.trunc(itemCalc));
-
         }
         break;
       case LEFT_ARROW:
@@ -301,10 +305,6 @@ export class ColorGridSelectComponent
 
   /** Handles focusin events within the list. */
   private _handleFocusin = (event: FocusEvent) => {
-    if (this.disabled) {
-      return;
-    }
-
     const activeIndex = this.colorItems
       .toArray()
       .findIndex((item) =>
@@ -323,9 +323,9 @@ export class ColorGridSelectComponent
    * @param index Index of the active option. If set to -1, no option will be active.
    */
   private _setActiveOption(index: number) {
-    this.colorItems.forEach((item, itemIndex) =>
-      item.setTabindex(itemIndex === index ? 0 : -1)
-    );
+    this.colorItems.forEach((item, itemIndex) => {
+      item.setTabindex(itemIndex === index ? 0 : -1);
+    });
 
     this._keyManager.setActiveItem(index);
   }
