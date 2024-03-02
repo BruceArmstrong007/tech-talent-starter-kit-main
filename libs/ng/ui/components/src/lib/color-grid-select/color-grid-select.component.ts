@@ -25,6 +25,7 @@ import {
   ColorGridItemComponent,
   ColorGridSelect,
   COLOR_GRID_SELECT,
+  ITEM_SIZE,
 } from './item';
 import { FocusKeyManager } from '@angular/cdk/a11y';
 import {
@@ -143,6 +144,8 @@ export class ColorGridSelectComponent
   @Output()
   public readonly valueChange = new EventEmitter<string | null | undefined>();
 
+  width = signal(0);
+
   /** @todo logic to generate a grid of colors to allow navigation */
   public readonly grid = computed((): string[][] => {
     // Calculate the number of items that can be added per row
@@ -150,7 +153,12 @@ export class ColorGridSelectComponent
     //   this._itemsPerRow = ...
     //
 
-    return chunk(this._items(), this._itemsPerRow);
+    const itemsPerRow =
+      this.width() === 0
+        ? ITEM_SIZE[this.itemSize] // any item size
+        : this.width() / ITEM_SIZE[this.itemSize];
+
+    return chunk(this._items(), itemsPerRow);
   });
 
   public get keyMan() {
@@ -191,6 +199,13 @@ export class ColorGridSelectComponent
       this._onChange(this.value);
       this.valueChange.emit(value);
     }
+  }
+
+  @HostListener('window:resize', ['$event'])
+  public onResize(event: any) {
+    this._ngZone.run(() => {
+      this.width.set(event.target.innerWidth);
+    });
   }
 
   public ngAfterViewInit() {
