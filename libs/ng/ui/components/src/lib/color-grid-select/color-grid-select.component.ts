@@ -267,21 +267,24 @@ export class ColorGridSelectComponent
     switch (event.keyCode) {
       case UP_ARROW:
         itemCalc = activeItem - Math.trunc(itemsPerRow);
-        if (itemCalc > 0) {
-          this._keyManager.setActiveItem(Math.trunc(itemCalc));
+        if (itemCalc >=  0) {
+          this._setActiveOption(Math.trunc(itemCalc));
         }
         break;
       case DOWN_ARROW:
         itemCalc = activeItem + Math.trunc(itemsPerRow);
         if (itemCalc < this._items().length) {
-          this._keyManager.setActiveItem(itemCalc);
+          this._setActiveOption(Math.trunc(itemCalc));
+
         }
         break;
       case LEFT_ARROW:
-        this._keyManager.setActiveItem(activeItem - 1);
+        this._setActiveOption(activeItem - 1);
+
         break;
       case RIGHT_ARROW:
-        this._keyManager.setActiveItem(activeItem + 1);
+        this._setActiveOption(activeItem + 1);
+
         break;
     }
   }
@@ -324,7 +327,7 @@ export class ColorGridSelectComponent
       item.setTabindex(itemIndex === index ? 0 : -1)
     );
 
-    this._keyManager.updateActiveItem(index);
+    this._keyManager.setActiveItem(index);
   }
 
   /**
