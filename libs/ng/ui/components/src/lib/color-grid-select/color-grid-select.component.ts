@@ -98,8 +98,8 @@ export class ColorGridSelectComponent
 
   @HostBinding('attr.tabindex')
   private get _tabIndex() {
-    return -1;
-    // return this.disabled ? -1 : 0;
+    // return -1;
+    return this.disabled ? -1 : 0;
   }
 
   @HostBinding('role')
@@ -151,8 +151,6 @@ export class ColorGridSelectComponent
     // Calculate the number of items that can be added per row
     // The calculation will be based on the available width of the element width and itemSize
     //   this._itemsPerRow = ...
-    //
-
     const itemsPerRow =
       this.width() === 0
         ? ITEM_SIZE[this.itemSize] // any item size
@@ -209,6 +207,7 @@ export class ColorGridSelectComponent
   }
 
   public ngAfterViewInit() {
+    this.width.set(this._el.nativeElement.offsetLeft);
     this._keyManager = new FocusKeyManager(this.colorItems)
       .withHomeAndEnd()
       .withHorizontalOrientation('ltr')
@@ -219,9 +218,9 @@ export class ColorGridSelectComponent
     this._resetActiveOption();
 
     // Move the tabindex to the currently-focused list item.
-    // this._keyManager.change.subscribe((activeItemIndex) => {
-    // this._setActiveOption(activeItemIndex);
-    // });
+    this._keyManager.change.subscribe((activeItemIndex) => {
+      this._setActiveOption(activeItemIndex);
+    });
 
     // If the active item is removed from the list, reset back to the first one.
     this.colorItems.changes.pipe(takeUntil(this._destroyed)).subscribe(() => {
@@ -259,17 +258,31 @@ export class ColorGridSelectComponent
    */
   @HostListener('keydown', ['$event'])
   private _onKeydown(event: KeyboardEvent) {
+    const itemsPerRow =
+      this.width() === 0
+        ? ITEM_SIZE[this.itemSize] // any item size
+        : this.width() / ITEM_SIZE[this.itemSize];
+    let itemCalc;
+    const activeItem = this._keyManager?.activeItemIndex ?? 0;
     switch (event.keyCode) {
       case UP_ARROW:
-      case DOWN_ARROW:
-      case LEFT_ARROW:
-      case RIGHT_ARROW: {
-        // add logic
-        // ....
-
-        this._keyManager.onKeydown(event); // @fixme remove the following after the grid logic is implemented
+        itemCalc = activeItem - Math.trunc(itemsPerRow);
+        if (itemCalc > 0) {
+          this._keyManager.setActiveItem(Math.trunc(itemCalc));
+        }
         break;
-      }
+      case DOWN_ARROW:
+        itemCalc = activeItem + Math.trunc(itemsPerRow);
+        if (itemCalc < this._items().length) {
+          this._keyManager.setActiveItem(itemCalc);
+        }
+        break;
+      case LEFT_ARROW:
+        this._keyManager.setActiveItem(activeItem - 1);
+        break;
+      case RIGHT_ARROW:
+        this._keyManager.setActiveItem(activeItem + 1);
+        break;
     }
   }
 
