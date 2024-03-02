@@ -37,7 +37,4 @@ export class AppComponent {
     }),
   });
 
-  constructor() {
-    // this.form.controls.color.disable();
-  }
 }
