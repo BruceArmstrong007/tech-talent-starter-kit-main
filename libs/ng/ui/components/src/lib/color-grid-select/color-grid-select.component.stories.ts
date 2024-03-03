@@ -3,21 +3,19 @@ import { ColorGridSelectComponent } from './color-grid-select.component';
 
 import { userEvent, within, screen } from '@storybook/testing-library';
 import { expect } from '@storybook/jest';
-import { COLOR_GRID_ITEMS, COLOR_GRID_ITEM_SIZES, ColorGridItemSize } from './item';
-import { input } from '@angular/core';
+import { COLOR_GRID_ITEMS, COLOR_GRID_ITEM_SIZES } from './item';
 
 const meta: Meta<ColorGridSelectComponent> = {
   component: ColorGridSelectComponent,
   title: 'ColorGridSelectComponent',
   args: {
-    value: COLOR_GRID_ITEMS[0],
-    itemSize: input<ColorGridItemSize>(COLOR_GRID_ITEM_SIZES[0]),
-    disabled: input(false),
-  },
+    itemSize: COLOR_GRID_ITEM_SIZES[0],
+    disabled: false,
+  } as any,
   argTypes: {
     value: {
-      control: 'select',
-      options: COLOR_GRID_ITEMS,
+      control: { type: 'select' },
+      options: COLOR_GRID_ITEMS
     },
     itemSize: {
       control: 'radio',
@@ -65,10 +63,12 @@ export const Default: Story = {
 
 export const Disabled: Story = {
   args: {
-    disabled: input(true),
-  },
+    disabled: true,
+  } as any,
 };
 
 export const Selected: Story = {
-  args: {},
+  args: {
+    value: COLOR_GRID_ITEMS[5],
+  },
 };

@@ -5,9 +5,7 @@ import {
 import { ColorGridSelectComponent } from './color-grid-select.component';
 import {
   COLOR_GRID_ITEM_SIZES,
-  ColorGridItemSize,
 } from './item';
-import { input } from '@angular/core';
 import {
   COLOR_GRID_SELECT,
   ColorGridItemComponent,
@@ -37,9 +35,11 @@ describe('ColorGridSelectComponent', () => {
 
     fixture = TestBed.createComponent(ColorGridSelectComponent);
     component = fixture.componentInstance;
-    component.items = input<string[]>(COLOR_GRID_ITEMS);
-    component.itemSize = input<ColorGridItemSize>(COLOR_GRID_ITEM_SIZES[0]);
-    component.disabled = input(false);
+    fixture.componentRef.setInput('items',COLOR_GRID_ITEMS);
+    fixture.detectChanges();
+    fixture.componentRef.setInput('itemSize',COLOR_GRID_ITEM_SIZES[0]);
+    fixture.detectChanges();
+    fixture.componentRef.setInput('disabled',false);
     fixture.detectChanges();
   });
 
@@ -47,7 +47,7 @@ describe('ColorGridSelectComponent', () => {
     expect(component).toBeTruthy();
   });
 
-  // it('should bind inputs correctly', () => {
-  //   expect(component.itemSize()).toBe(COLOR_GRID_ITEM_SIZES[0]);
-  // });
+  it('should bind inputs correctly', () => {
+    expect(component.itemSize).toBe(COLOR_GRID_ITEM_SIZES[0]);
+  });
 });
