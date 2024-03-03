@@ -32,6 +32,7 @@ import {
 import { FocusKeyManager } from '@angular/cdk/a11y';
 import {
   DOWN_ARROW,
+  L,
   LEFT_ARROW,
   RIGHT_ARROW,
   UP_ARROW,
@@ -77,8 +78,6 @@ export class ColorGridSelectComponent
   /** Emits when the list has been destroyed. */
   private readonly _destroyed = new Subject<void>();
 
-
-
   private readonly _el = inject(ElementRef<ColorGridSelectComponent>);
 
   private readonly _ngZone = inject(NgZone);
@@ -108,10 +107,9 @@ export class ColorGridSelectComponent
   @ViewChildren(ColorGridItemComponent)
   public colorItems!: QueryList<ColorGridItemComponent>;
 
-  items = input<string[]>(COLOR_GRID_ITEMS)
+  items = input<string[]>(COLOR_GRID_ITEMS);
 
-  public itemSize = input<ColorGridItemSize>(COLOR_GRID_ITEM_SIZES[0])
-
+  public itemSize = input<ColorGridItemSize>(COLOR_GRID_ITEM_SIZES[0]);
 
   // can not be converted as input signal's value cant be updated
   @Input()
@@ -126,19 +124,23 @@ export class ColorGridSelectComponent
     this._setActiveOption(activeItem);
   }
 
-public disabled = input<boolean>(false)
+  public disabled = input<boolean>(false);
 
   @Output()
   public readonly valueChange = new EventEmitter<string | null | undefined>();
 
   width = signal(0);
 
+  observer!: ResizeObserver;
+
   itemSizeInPx: Signal<number> = computed(() => ITEM_SIZE[this.itemSize()]);
 
   itemsPerRow: Signal<number> = computed(() => {
-    return this.width() === 0
-      ? this._itemsPerRow // any item size
-      : this.width() / this.itemSizeInPx();
+    return Math.trunc(
+      this.width() === 0
+        ? this._itemsPerRow
+        : this.width() / this.itemSizeInPx()
+    );
   });
 
   /** @todo logic to generate a grid of colors to allow navigation */
@@ -189,18 +191,15 @@ public disabled = input<boolean>(false)
     }
   }
 
-  @HostListener('window:resize', ['$event'])
-  public onResize(event: any) {
-      this.width.set(event.target.innerWidth);
-  }
-
   public ngAfterViewInit() {
-    this.width.set(this._el.nativeElement.offsetWidth);
+    this.observer = new ResizeObserver((entries) => {
+      this._ngZone.run(() => {
+        this.width.set(entries[0].contentRect.width);
+      });
+    });
+    this.observer.observe(this._el.nativeElement.children[0]);
+
     this._keyManager = new FocusKeyManager(this.colorItems)
-      .withHomeAndEnd()
-      .withHorizontalOrientation('ltr')
-      .skipPredicate(() => this.disabled())
-      .withWrap();
 
     // Set the initial focus.
     this._resetActiveOption();
@@ -253,26 +252,61 @@ public disabled = input<boolean>(false)
     }
     let itemCalc;
     const activeItem = this._keyManager?.activeItemIndex ?? 0;
+    const itemsLength = this.items().length,
+      itemsPerRow = this.itemsPerRow();
     switch (event.keyCode) {
       case UP_ARROW:
-        itemCalc = activeItem - Math.trunc(this.itemsPerRow());
+        itemCalc = activeItem - Math.trunc(itemsPerRow);
         if (itemCalc >= 0) {
           this._setActiveOption(Math.trunc(itemCalc));
+        } else {
+          const currentItem = activeItem + 1;
+          let tempPos = itemsLength;
+          while (tempPos % itemsPerRow != 0) {
+            tempPos++;
+          }
+          let actualLastPos = tempPos - itemsLength;
+          actualLastPos = itemsPerRow - actualLastPos;
+          if (currentItem < actualLastPos) {
+            this._setActiveOption(
+              itemsLength - 1 - (actualLastPos - currentItem)
+            );
+          } else {
+            this._setActiveOption(itemsLength - 1);
+          }
         }
         break;
       case DOWN_ARROW:
-        itemCalc = activeItem + Math.trunc(this.itemsPerRow());
-        if (itemCalc < this.items().length) {
+        itemCalc = activeItem + Math.trunc(itemsPerRow);
+        if (itemCalc < itemsLength) {
           this._setActiveOption(Math.trunc(itemCalc));
+        } else {
+          const currentItem = activeItem + 1;
+          const dif = itemsLength - currentItem;
+          let tempPos = itemsLength;
+          while (tempPos % itemsPerRow != 0) {
+            tempPos++;
+          }
+          const actualLastPos = tempPos - itemsLength;
+          const nextPosition = itemsPerRow - (actualLastPos + dif);
+          if (nextPosition <= 0) {
+            this._setActiveOption(itemsLength - 1);
+          } else {
+            this._setActiveOption(nextPosition - 1);
+          }
         }
         break;
       case LEFT_ARROW:
-        this._setActiveOption(activeItem - 1);
-
+        itemCalc = activeItem - 1;
+        if (itemCalc < 0) {
+          this._setActiveOption(itemsLength - 1);
+        } else this._setActiveOption(itemCalc);
         break;
       case RIGHT_ARROW:
-        this._setActiveOption(activeItem + 1);
-
+        itemCalc = activeItem + 1;
+        if (itemCalc >= itemsLength) {
+          this._setActiveOption(0);
+        } else this._setActiveOption(itemCalc);
         break;
     }
   }
