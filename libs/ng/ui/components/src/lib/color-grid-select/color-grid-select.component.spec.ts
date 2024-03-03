@@ -1,15 +1,10 @@
-import {
-  ComponentFixture,
-  TestBed,
-} from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ColorGridSelectComponent } from './color-grid-select.component';
+import { COLOR_GRID_ITEM_SIZES } from './item';
 import {
-  COLOR_GRID_ITEM_SIZES,
-} from './item';
-import {
+  COLOR_GRID_ITEMS,
   COLOR_GRID_SELECT,
   ColorGridItemComponent,
-  COLOR_GRID_ITEMS,
 } from './item/item.component';
 import { NG_VALUE_ACCESSOR } from '@angular/forms';
 
@@ -35,12 +30,9 @@ describe('ColorGridSelectComponent', () => {
 
     fixture = TestBed.createComponent(ColorGridSelectComponent);
     component = fixture.componentInstance;
-    fixture.componentRef.setInput('items',COLOR_GRID_ITEMS);
-    fixture.detectChanges();
-    fixture.componentRef.setInput('itemSize',COLOR_GRID_ITEM_SIZES[0]);
-    fixture.detectChanges();
-    fixture.componentRef.setInput('disabled',false);
-    fixture.detectChanges();
+    fixture.componentRef.setInput('items', COLOR_GRID_ITEMS);
+    fixture.componentRef.setInput('itemSize', COLOR_GRID_ITEM_SIZES[0]);
+    fixture.componentRef.setInput('disabled', false);
   });
 
   it('should create', () => {

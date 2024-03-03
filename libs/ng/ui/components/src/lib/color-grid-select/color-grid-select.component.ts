@@ -137,7 +137,7 @@ public disabled = input<boolean>(false)
 
   itemsPerRow: Signal<number> = computed(() => {
     return this.width() === 0
-      ? this.itemSizeInPx() // any item size
+      ? this._itemsPerRow // any item size
       : this.width() / this.itemSizeInPx();
   });
 
