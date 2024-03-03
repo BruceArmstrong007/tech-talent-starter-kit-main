@@ -90,7 +90,7 @@ export class ColorGridItemComponent implements Highlightable, FocusableOption {
 
   @HostBinding('role')
   private get _role() {
-    return 'option';
+    return 'radio';
   }
 
   /** The unique ID for the radio button. */
