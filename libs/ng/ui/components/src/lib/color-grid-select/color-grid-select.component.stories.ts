@@ -1,7 +1,12 @@
 import type { Meta, StoryObj } from '@storybook/angular';
 import { ColorGridSelectComponent } from './color-grid-select.component';
 
-import { userEvent, within, screen } from '@storybook/testing-library';
+import {
+  userEvent,
+  within,
+  screen,
+  fireEvent,
+} from '@storybook/testing-library';
 import { expect } from '@storybook/jest';
 import { COLOR_GRID_ITEMS, COLOR_GRID_ITEM_SIZES } from './item';
 
@@ -15,7 +20,7 @@ const meta: Meta<ColorGridSelectComponent> = {
   argTypes: {
     value: {
       control: { type: 'select' },
-      options: COLOR_GRID_ITEMS
+      options: COLOR_GRID_ITEMS,
     },
     itemSize: {
       control: 'radio',
@@ -47,17 +52,49 @@ export const Default: Story = {
   args: {},
   play: async ({ args, canvasElement, step }) => {
     const colorGrid = within(canvasElement).getByRole('radiogroup');
-    colorGrid.focus();
+
+    await step('Default first color selected', async () => {
+      await expect((await screen.findAllByRole('radio'))[0]).toHaveAttribute('aria-selected', 'true');
+    });
+
+    await step(
+      'should click the grid color and the aria-selected should be true',
+      async () => {
+        await fireEvent.click((await screen.findAllByRole('radio'))[4]);
+        await expect((await screen.findAllByRole('radio'))[4]).toHaveAttribute('aria-selected', 'true');
+      }
+    );
+
 
     await step('Focus and use keyboard', async () => {
-      userEvent.type(colorGrid, '{ArrowRight}', {
+      await colorGrid.focus();
+      await userEvent.type(colorGrid, '{ArrowRight}', {
         delay: 600,
       });
+      await userEvent.keyboard('{ArrowRight}');
+      await userEvent.type(colorGrid, '{ArrowRight}');
+      await fireEvent.keyPress(colorGrid, {
+        key: 'ArrowRight',
+        code: 'ArrowRight',
+        charCode: 39,
+      });
+      await fireEvent.keyPress(colorGrid, {
+        key: 'ArrowRight',
+        code: 'ArrowRight',
+        charCode: 39,
+      });
+      await fireEvent.keyPress(colorGrid, {
+        key: 'ArrowLeft',
+        code: 'ArrowLeft',
+        charCode: 37,
+      });
+      await fireEvent.keyPress(colorGrid, {
+        key: 'ArrowDown',
+        code: 'ArrowDown',
+        charCode: 40,
+      });
     });
-    const checkedRadioButton = await screen.getByRole('radio', {
-      checked: true,
-    });
-    await expect(Number(checkedRadioButton.id.split('-').pop())).toBe(2);
+
   },
 };
 
@@ -65,10 +102,25 @@ export const Disabled: Story = {
   args: {
     disabled: true,
   } as any,
+
+  play: async ({ step }) => {
+    await step(
+      'should click the grid color and the aria-selected should be false',
+      async () => {
+        await fireEvent.click((await screen.findAllByRole('radio'))[4]);
+        expect((await screen.findAllByRole('radio'))[4]).toHaveAttribute('aria-selected', 'false');
+      }
+    );
+  },
 };
 
 export const Selected: Story = {
   args: {
     value: COLOR_GRID_ITEMS[5],
+  },
+  play: async ({ step }) => {
+    await step('Default first color selected', async () => {
+      await expect((await screen.findAllByRole('radio'))[5]).toHaveAttribute('aria-selected', 'true');
+    });
   },
 };

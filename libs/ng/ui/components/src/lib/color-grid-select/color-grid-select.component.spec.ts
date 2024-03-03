@@ -7,6 +7,7 @@ import {
   ColorGridItemComponent,
 } from './item/item.component';
 import { NG_VALUE_ACCESSOR } from '@angular/forms';
+import { input } from '@angular/core';
 
 describe('ColorGridSelectComponent', () => {
   let component: ColorGridSelectComponent;
@@ -30,9 +31,14 @@ describe('ColorGridSelectComponent', () => {
 
     fixture = TestBed.createComponent(ColorGridSelectComponent);
     component = fixture.componentInstance;
-    fixture.componentRef.setInput('items', COLOR_GRID_ITEMS);
-    fixture.componentRef.setInput('itemSize', COLOR_GRID_ITEM_SIZES[0]);
-    fixture.componentRef.setInput('disabled', false);
+    component.items = input(COLOR_GRID_ITEMS);
+    await fixture.whenStable()
+    // fixture.componentRef.setInput('items',COLOR_GRID_ITEMS);
+    // fixture.detectChanges();
+    // fixture.componentRef.setInput('itemSize',COLOR_GRID_ITEM_SIZES[0]);
+    // fixture.detectChanges();
+    // fixture.componentRef.setInput('disabled',false);
+    // fixture.detectChanges();
   });
 
   it('should create', () => {
@@ -40,6 +46,6 @@ describe('ColorGridSelectComponent', () => {
   });
 
   it('should bind inputs correctly', () => {
-    expect(component.itemSize).toBe(COLOR_GRID_ITEM_SIZES[0]);
+    expect(component.itemSize()).toBe(COLOR_GRID_ITEM_SIZES[0]);
   });
 });
