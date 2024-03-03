@@ -191,9 +191,7 @@ public disabled = input<boolean>(false)
 
   @HostListener('window:resize', ['$event'])
   public onResize(event: any) {
-    this._ngZone.run(() => {
       this.width.set(event.target.innerWidth);
-    });
   }
 
   public ngAfterViewInit() {
