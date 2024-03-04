@@ -54,47 +54,55 @@ export const Default: Story = {
     const colorGrid = within(canvasElement).getByRole('radiogroup');
 
     await step('Default first color selected', async () => {
-      await expect((await screen.findAllByRole('radio'))[0]).toHaveAttribute('aria-selected', 'true');
+      await expect((await screen.findAllByRole('radio'))[0]).toHaveAttribute(
+        'aria-selected',
+        'true'
+      );
     });
 
     await step(
       'should click the grid color and the aria-selected should be true',
       async () => {
         await fireEvent.click((await screen.findAllByRole('radio'))[4]);
-        await expect((await screen.findAllByRole('radio'))[4]).toHaveAttribute('aria-selected', 'true');
+        await expect((await screen.findAllByRole('radio'))[4]).toHaveAttribute(
+          'aria-selected',
+          'true'
+        );
       }
     );
 
-
     await step('Focus and use keyboard', async () => {
       await colorGrid.focus();
+
       await userEvent.type(colorGrid, '{ArrowRight}', {
         delay: 600,
       });
+
       await userEvent.keyboard('{ArrowRight}');
+
       await userEvent.type(colorGrid, '{ArrowRight}');
-      await fireEvent.keyPress(colorGrid, {
+
+      await fireEvent.keyUp(colorGrid, {
         key: 'ArrowRight',
-        code: 'ArrowRight',
+        keycode: 39,
         charCode: 39,
       });
-      await fireEvent.keyPress(colorGrid, {
+      await fireEvent.keyUp(colorGrid, {
         key: 'ArrowRight',
-        code: 'ArrowRight',
         charCode: 39,
+        keycode: 39,
       });
-      await fireEvent.keyPress(colorGrid, {
+      await fireEvent.keyUp(colorGrid, {
         key: 'ArrowLeft',
-        code: 'ArrowLeft',
+        keycode: 37,
         charCode: 37,
       });
-      await fireEvent.keyPress(colorGrid, {
+      await fireEvent.keyUp(colorGrid, {
         key: 'ArrowDown',
-        code: 'ArrowDown',
+        keycode: 40,
         charCode: 40,
       });
     });
-
   },
 };
 
@@ -108,7 +116,10 @@ export const Disabled: Story = {
       'should click the grid color and the aria-selected should be false',
       async () => {
         await fireEvent.click((await screen.findAllByRole('radio'))[4]);
-        expect((await screen.findAllByRole('radio'))[4]).toHaveAttribute('aria-selected', 'false');
+        expect((await screen.findAllByRole('radio'))[4]).toHaveAttribute(
+          'aria-selected',
+          'false'
+        );
       }
     );
   },
@@ -120,7 +131,10 @@ export const Selected: Story = {
   },
   play: async ({ step }) => {
     await step('Default first color selected', async () => {
-      await expect((await screen.findAllByRole('radio'))[5]).toHaveAttribute('aria-selected', 'true');
+      await expect((await screen.findAllByRole('radio'))[5]).toHaveAttribute(
+        'aria-selected',
+        'true'
+      );
     });
   },
 };
