@@ -84,6 +84,8 @@ export class ColorGridSelectComponent
 
   private _itemsPerRow = 5;
 
+  public tabindex = input(0);
+
   private _keyManager!: FocusKeyManager<ColorGridItemComponent>;
 
   private _value?: string | null | undefined = COLOR_GRID_ITEMS[0];
