@@ -1,9 +1,3 @@
-# Statusbrew TechTalentStarterKit
-
-> Managed by Statusbrew for recruitment purposes
-
-Welcome to the Statusbrew TechTalentStarterKit, enhanced for rapid development and testing. This project is designed to assess your skills and understanding of [Angular within a monorepo setup using Nx tools](https://nx.dev/getting-started/tutorials/angular-monorepo-tutorial), emphasizing structured code, separation of concerns, and best practices in Angular development. With the integration of TailwindCSS for styling and Storybook for component development and testing, this starter kit aims to streamline the creation of visually consistent and accessible UI components.
-
 ## Getting Started
 
 Ensure you have the latest version of Node.js and npm installed before beginning. This project utilizes Nx for monorepo management, allowing efficient organization and management of Angular applications and libraries.
